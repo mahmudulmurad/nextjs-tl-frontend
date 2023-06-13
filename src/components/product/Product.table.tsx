@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 interface TableData{
     data: TProductDto[]
     handleDeleteProduct:(id: string) => void;
-    handleUpdateProduct:(id: string) => void;
+    handleUpdateProduct:(data: TProductDto) => void;
     handleSelectProduct:(id: string) => void;
 }
 const ProductTable = ({
@@ -41,7 +41,7 @@ const ProductTable = ({
                 <IconButton onClick={() => handleDeleteProduct(product.id)}>
                   <Delete />
                 </IconButton>
-                <IconButton onClick={() => handleUpdateProduct(product.id)}>
+                <IconButton onClick={() => handleUpdateProduct(product)}>
                   <Edit />
                 </IconButton>
                 <IconButton onClick={() => handleSelectProduct(product.id)}>

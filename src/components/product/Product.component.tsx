@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { Button, Toolbar, AppBar, Typography, Box, Modal } from '@mui/material';
@@ -14,24 +14,27 @@ const Product = () => {
   const router = useRouter();
   const [openModal, setOpenModal] = useState(false);
   const [products, setProducts] = useState<TProductDto[]>([]);
+  const [product, setProduct] = useState<TProductDto | null>(null);
+  const [call, setCall] = useState(true);
+  
+  const fetchProducts = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await axios.get(all_products_url,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      setProducts(response.data);
+      setCall(false)
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    }
+  }, [call]);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const token = localStorage.getItem('accessToken');
-        const response = await axios.get(all_products_url,{
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        setProducts(response.data);
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
-      }
-    };
-
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
@@ -47,6 +50,7 @@ const Product = () => {
 
   const handleModalOpen = () => {
     setOpenModal(true);
+    setProduct(null)
   };
 
   const handleModalClose = () => {
@@ -56,8 +60,9 @@ const Product = () => {
   const handleDeleteProduct = (data: string) => {
     console.log(data);    
   };
-  const handleUpdateProduct = (data: string) => {
-    console.log(data);    
+  const handleUpdateProduct = (data: TProductDto) => {
+    setOpenModal(true);
+    setProduct(data)
   };
   const handleSelectProduct = (data: string) => {
     console.log(data);    
@@ -91,7 +96,11 @@ const Product = () => {
       />
       <Modal open={openModal} onClose={handleModalClose}>
         <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
-          <ProductForm />
+          <ProductForm 
+            productData={product} 
+            setCall={setCall} 
+            setOpenModal={setCall}
+          />
         </Box>
       </Modal>
       </Box>

@@ -22,3 +22,9 @@ export interface ProductForm {
     price: number;
     status: boolean;
   }
+
+  export interface TFormType {
+    productData?: TProductDto | null;
+    setCall: React.Dispatch<React.SetStateAction<boolean>>;
+    setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+  }
