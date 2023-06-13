@@ -28,3 +28,10 @@ export interface ProductForm {
     setCall: React.Dispatch<React.SetStateAction<boolean>>;
     setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
   }
+
+  export interface TableData{
+    data: TProductDto[]
+    handleDeleteProduct:(id: string) => void;
+    handleUpdateProduct:(data: TProductDto) => void;
+    handleSelectProduct:(id: string) => void;
+}

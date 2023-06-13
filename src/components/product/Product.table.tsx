@@ -1,13 +1,7 @@
-import { TProductDto } from '@/common/state.interface';
+import { TableData } from '@/common/state.interface';
 import { Delete, Edit, SelectAll } from '@mui/icons-material';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
 
-interface TableData{
-    data: TProductDto[]
-    handleDeleteProduct:(id: string) => void;
-    handleUpdateProduct:(data: TProductDto) => void;
-    handleSelectProduct:(id: string) => void;
-}
 const ProductTable = ({
     data, 
     handleDeleteProduct,

@@ -1,14 +1,14 @@
 import React, { useCallback, useState } from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Button, Toolbar, AppBar, Typography, Box, Modal } from '@mui/material';
+import { Button, Toolbar, AppBar, Typography, Box, Modal, Snackbar, Alert } from '@mui/material';
 import { Logout } from '@mui/icons-material';
 import ProductForm from './Product.form';
 import { heading } from './Product.style';
 import axios from 'axios';
-import { all_products_url } from '@/api';
+import { all_products_url, product_delete } from '@/api';
 import ProductTable from './Product.table';
-import { TProductDto } from '@/common/state.interface';
+import { Message, TProductDto } from '@/common/state.interface';
 
 const Product = () => {
   const router = useRouter();
@@ -16,7 +16,8 @@ const Product = () => {
   const [products, setProducts] = useState<TProductDto[]>([]);
   const [product, setProduct] = useState<TProductDto | null>(null);
   const [call, setCall] = useState(true);
-  
+  const [message, setMessage] = useState<Message>({ error: '', success: '' });
+
   const fetchProducts = useCallback(async () => {
     try {
       const token = localStorage.getItem('accessToken');
@@ -57,16 +58,40 @@ const Product = () => {
     setOpenModal(false);
   };
 
-  const handleDeleteProduct = (data: string) => {
-    console.log(data);    
+  const handleDeleteProduct = async (id: string) => {
+    try{
+    const token = localStorage.getItem('accessToken');
+    const response = await axios.delete(product_delete(id),{
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+   if(response?.status === 200){
+    setMessage((prevMessage) => ({ ...prevMessage, success: response?.data }));
+    setCall(true)
+   }
+  }
+   catch (error: any) {
+    if (error?.response) {
+      setMessage((prevMessage) => ({ ...prevMessage, error: error.response?.data?.message }));
+    } else {
+      setMessage((prevMessage) => ({ ...prevMessage, error: `Something went wrong` }));
+    }
+  }
   };
   const handleUpdateProduct = (data: TProductDto) => {
     setOpenModal(true);
     setProduct(data)
   };
+
   const handleSelectProduct = (data: string) => {
     console.log(data);    
   };
+
+  const handleSnackbarClose = () => {
+    setMessage((prevMessage) => ({ ...prevMessage, success: '' }));
+  };
+
   return (
     <>
       <AppBar position="static">
@@ -94,6 +119,17 @@ const Product = () => {
         handleUpdateProduct={handleUpdateProduct} 
         handleSelectProduct={handleSelectProduct}
       />
+      {message.error && (
+        <Typography sx={{mt: '10px'}}  variant="body2" color="error" component="p">
+          {message.error}
+        </Typography>
+      )}
+
+      <Snackbar open={!!message.success} autoHideDuration={3000} onClose={handleSnackbarClose} message={message.success}>
+          <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+            {message.success}
+          </Alert>
+      </Snackbar>
       <Modal open={openModal} onClose={handleModalClose}>
         <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
           <ProductForm 
