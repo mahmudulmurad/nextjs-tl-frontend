@@ -13,3 +13,12 @@ export interface ProductForm {
     price: number;
     status: boolean;
   }
+
+  export interface TProductDto{
+    id: string;
+    productName: string;
+    categoryId: number;
+    categoryName: string;
+    price: number;
+    status: boolean;
+  }

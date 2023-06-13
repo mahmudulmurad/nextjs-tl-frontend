@@ -5,14 +5,33 @@ import { Button, Toolbar, AppBar, Typography, Box, Modal } from '@mui/material';
 import { Logout } from '@mui/icons-material';
 import ProductForm from './Product.form';
 import { heading } from './Product.style';
+import axios from 'axios';
+import { all_products_url } from '@/api';
+import ProductTable from './Product.table';
+import { TProductDto } from '@/common/state.interface';
 
 const Product = () => {
   const router = useRouter();
   const [openModal, setOpenModal] = useState(false);
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    router.push('/');
-  };
+  const [products, setProducts] = useState<TProductDto[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const response = await axios.get(all_products_url,{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        setProducts(response.data);
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
@@ -20,6 +39,11 @@ const Product = () => {
       router.push('/');
     }
   }, [router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    router.push('/');
+  };
 
   const handleModalOpen = () => {
     setOpenModal(true);
@@ -29,6 +53,15 @@ const Product = () => {
     setOpenModal(false);
   };
 
+  const handleDeleteProduct = (data: string) => {
+    console.log(data);    
+  };
+  const handleUpdateProduct = (data: string) => {
+    console.log(data);    
+  };
+  const handleSelectProduct = (data: string) => {
+    console.log(data);    
+  };
   return (
     <>
       <AppBar position="static">
@@ -50,6 +83,12 @@ const Product = () => {
         <Button variant="contained" color="primary" onClick={handleModalOpen}>
         Create Product
       </Button>
+      <ProductTable 
+        data={products} 
+        handleDeleteProduct={handleDeleteProduct} 
+        handleUpdateProduct={handleUpdateProduct} 
+        handleSelectProduct={handleSelectProduct}
+      />
       <Modal open={openModal} onClose={handleModalClose}>
         <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
           <ProductForm />
