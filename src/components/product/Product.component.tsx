@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Button, Toolbar, AppBar, Typography, Box } from '@mui/material';
+import { Button, Toolbar, AppBar, Typography, Box, Modal } from '@mui/material';
 import { Logout } from '@mui/icons-material';
+import ProductForm from './Product.form';
+import { heading } from './Product.style';
 
 const Product = () => {
   const router = useRouter();
-
+  const [openModal, setOpenModal] = useState(false);
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     router.push('/');
@@ -18,6 +20,14 @@ const Product = () => {
       router.push('/');
     }
   }, [router]);
+
+  const handleModalOpen = () => {
+    setOpenModal(true);
+  };
+
+  const handleModalClose = () => {
+    setOpenModal(false);
+  };
 
   return (
     <>
@@ -32,10 +42,19 @@ const Product = () => {
         </Toolbar>
       </AppBar>
       <Box sx={{ padding: '16px' }}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Welcome to the Product Dashboard
-        </Typography>
-        
+        <Box sx={heading}>
+          <Typography variant="h5" component="h2" gutterBottom>
+            Welcome to the Product Dashboard
+          </Typography>
+        </Box>
+        <Button variant="contained" color="primary" onClick={handleModalOpen}>
+        Create Product
+      </Button>
+      <Modal open={openModal} onClose={handleModalClose}>
+        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
+          <ProductForm />
+        </Box>
+      </Modal>
       </Box>
     </>
   );
