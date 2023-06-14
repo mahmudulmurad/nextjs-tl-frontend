@@ -6,13 +6,14 @@ import { Logout } from '@mui/icons-material';
 import ProductForm from './Product.form';
 import { heading } from './Product.style';
 import axios from 'axios';
-import { all_products_url, product_delete } from '@/api';
+import { all_products_url, product_batch_delete, product_delete } from '@/api';
 import ProductTable from './Product.table';
-import { Message, TProductDto } from '@/common/state.interface';
+import { Message, ModalStatus, TProductDto } from '@/common/state.interface';
+import ProductUpdateForm from './ProductUpdate.form';
 
 const Product = () => {
   const router = useRouter();
-  const [openModal, setOpenModal] = useState(false);
+  const [openModal, setOpenModal] = useState<ModalStatus>({create: false, update: false});
   const [products, setProducts] = useState<TProductDto[]>([]);
   const [product, setProduct] = useState<TProductDto | null>(null);
   const [call, setCall] = useState(true);
@@ -50,12 +51,12 @@ const Product = () => {
   };
 
   const handleModalOpen = () => {
-    setOpenModal(true);
+    setOpenModal((prev)=>({...prev, create:true}));
     setProduct(null)
   };
 
   const handleModalClose = () => {
-    setOpenModal(false);
+    setOpenModal(()=>({create:false, update: false}));
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -80,12 +81,32 @@ const Product = () => {
   }
   };
   const handleUpdateProduct = (data: TProductDto) => {
-    setOpenModal(true);
+    setOpenModal((prev)=>({...prev, update:true}));
     setProduct(data)
   };
 
-  const handleSelectProduct = (data: string) => {
-    console.log(data);    
+  const handleSelectProduct = async(data: string[]) => {
+    try{
+      const payload = {ids: data}
+      const token = localStorage.getItem('accessToken');
+      const response = await axios.delete(product_batch_delete, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: payload
+      });
+     if(response?.status === 200){
+      setMessage((prevMessage) => ({ ...prevMessage, success: response?.data }));
+      setCall(true)
+     }
+    }
+     catch (error: any) {
+      if (error?.response) {
+        setMessage((prevMessage) => ({ ...prevMessage, error: error.response?.data?.message }));
+      } else {
+        setMessage((prevMessage) => ({ ...prevMessage, error: `Something went wrong` }));
+      }
+    }
   };
 
   const handleSnackbarClose = () => {
@@ -130,12 +151,20 @@ const Product = () => {
             {message.success}
           </Alert>
       </Snackbar>
-      <Modal open={openModal} onClose={handleModalClose}>
+      <Modal open={openModal.create} onClose={handleModalClose}>
         <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
-          <ProductForm 
+          <ProductForm
+            setCall={setCall} 
+            setOpenModal={setOpenModal}
+          />
+        </Box>
+      </Modal>
+      <Modal open={openModal.update} onClose={handleModalClose}>
+        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
+          <ProductUpdateForm 
             productData={product} 
             setCall={setCall} 
-            setOpenModal={setCall}
+            setOpenModal={setOpenModal}
           />
         </Box>
       </Modal>

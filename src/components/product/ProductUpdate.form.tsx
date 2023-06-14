@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextField, Button, Typography, Snackbar, RadioGroup, Radio, FormControlLabel, Alert, Box } from '@mui/material';
 import { Message, ProductForm, TFormType } from '../../common/state.interface';
 import axios from 'axios';
-import { create_product } from '../../api'
+import { product_update } from '../../api'
 
-const ProductForm = (props:TFormType) => {
-  const {setCall, setOpenModal} =  props;
+const ProductUpdateForm = (props:TFormType) => {
+  const {productData, setCall, setOpenModal} =  props;
     const {
       register,
       handleSubmit,
+      setValue,
       formState: { errors },
     } = useForm<ProductForm>();
   
@@ -24,6 +25,15 @@ const ProductForm = (props:TFormType) => {
         setMessage((prevMessage) => ({ ...prevMessage, success: '' }));
     };
 
+    useEffect(() =>{
+      if(productData){
+        setValue('productName',productData?.productName)
+        setValue('categoryId',productData?.categoryId)
+        setValue('categoryName',productData?.categoryName)
+        setValue('price',productData?.price)
+        setProductStatus(productData?.status=== true ? 'true' : 'false')
+      }
+    },[productData])
   
     const onSubmit = async (data: ProductForm) => {
       const formData = {
@@ -32,13 +42,13 @@ const ProductForm = (props:TFormType) => {
       }
       try {
         const token = localStorage.getItem('accessToken');
-        const response = await axios.post(create_product,formData,{
+        const response = await axios.patch(product_update(productData?.id),formData,{
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        if(response?.status === 201){
-          setMessage((prevMessage) => ({ ...prevMessage, success: 'Product created successfully' }));
+        if(response?.status === 200){
+          setMessage((prevMessage) => ({ ...prevMessage, success: 'Product updated successfully' }));
           setCall(true);
           setOpenModal({create:false, update: false});
         }
@@ -46,7 +56,7 @@ const ProductForm = (props:TFormType) => {
         if (error?.response) {
           setMessage((prevMessage) => ({ ...prevMessage, error: error.response?.data?.message }));
         } else {
-          setMessage((prevMessage) => ({ ...prevMessage, error: `Product create failed. Please try again.` }));
+          setMessage((prevMessage) => ({ ...prevMessage, error: `Product update failed. Please try again.` }));
         }
       }
     };
@@ -106,7 +116,7 @@ const ProductForm = (props:TFormType) => {
               <FormControlLabel value="false" control={<Radio />} label="Inactive" />
             </RadioGroup>
             <Button type="submit" variant="contained" color="primary">
-              Create Product
+              Update Product
             </Button>
         </form>
   
@@ -125,4 +135,4 @@ const ProductForm = (props:TFormType) => {
     );
   };
   
-  export default ProductForm;
+  export default ProductUpdateForm;
