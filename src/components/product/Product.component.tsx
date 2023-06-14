@@ -29,7 +29,7 @@ const Product = () => {
       })
       setProducts(response.data);
       setCall(false)
-      setMessage((prevMessage) => ({ error: '', success: 'all products' }));
+      setMessage(() => ({ error: '', success: 'all products' }));
     } catch (error: any) {
       if (error?.response) {
         if(error?.response?.status === 404){
