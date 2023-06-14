@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { Button, Toolbar, AppBar, Typography, Box, Modal, Snackbar, Alert } from '@mui/material';
 import { Logout } from '@mui/icons-material';
-import ProductForm from './Product.form';
+import ProductCreateForm from './ProductCreate.form';
 import { heading } from './Product.style';
 import axios from 'axios';
 import { all_products_url, product_batch_delete, product_delete } from '@/api';
@@ -29,14 +29,23 @@ const Product = () => {
       })
       setProducts(response.data);
       setCall(false)
-    } catch (error) {
-      console.error('Failed to fetch products:', error);
+      setMessage((prevMessage) => ({ error: '', success: 'all products' }));
+    } catch (error: any) {
+      if (error?.response) {
+        if(error?.response?.status === 404){
+          setProducts([])
+          setCall(false)
+        }
+        setMessage((prevMessage) => ({ ...prevMessage, error: error.response?.data?.message }));
+      } else {
+        setMessage((prevMessage) => ({ ...prevMessage, error: `Something went wrong` }));
+      }
     }
-  }, [call]);
+  }, []);
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+  }, [fetchProducts,call]);
 
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
@@ -153,7 +162,7 @@ const Product = () => {
       </Snackbar>
       <Modal open={openModal.create} onClose={handleModalClose}>
         <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
-          <ProductForm
+          <ProductCreateForm
             setCall={setCall} 
             setOpenModal={setOpenModal}
           />

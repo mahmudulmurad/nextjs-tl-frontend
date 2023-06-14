@@ -5,7 +5,7 @@ import { Message, ProductForm, TFormType } from '../../common/state.interface';
 import axios from 'axios';
 import { create_product } from '../../api'
 
-const ProductForm = (props:TFormType) => {
+const ProductCreateForm = (props:TFormType) => {
   const {setCall, setOpenModal} =  props;
     const {
       register,
@@ -125,4 +125,4 @@ const ProductForm = (props:TFormType) => {
     );
   };
   
-  export default ProductForm;
+  export default ProductCreateForm;
